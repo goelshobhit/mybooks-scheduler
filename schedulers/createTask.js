@@ -52,7 +52,7 @@ agenda.define(
 	}
 );
 
-(async function() {
+const taskScheduler = async () => {
 	console.log(time(), "Agenda started");
 	agenda.processEvery("1 second");
 	await agenda.start();
@@ -68,4 +68,6 @@ agenda.define(
 	agenda.on("fail", (error, job) => {
 		console.log(time(), `Job <${job.attrs.name}> failed:`, error);
 	});
-})();
+};
+
+module.exports = taskScheduler;

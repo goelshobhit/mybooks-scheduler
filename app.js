@@ -7,6 +7,7 @@ var indexRouter = require("./routes/index");
 var apiRouter = require("./routes/api");
 var apiResponse = require("./helpers/apiResponse");
 var cors = require("cors");
+const taskScheduler = require("./schedulers/createTask");
 
 // DB connection
 var MONGODB_URL = process.env.MONGODB_URL;
@@ -53,5 +54,10 @@ app.use((err, req, res) => {
 		return apiResponse.unauthorizedResponse(res, err.message);
 	}
 });
+
+// scheduler
+
+taskScheduler();
+
 
 module.exports = app;
