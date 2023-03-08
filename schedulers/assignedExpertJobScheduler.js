@@ -3,6 +3,7 @@
  * @file Illustrate concurrency and locking
  */
 const Agenda = require("agenda");
+const moment = require("moment");
 const { sum, filter, map, isEqual, toInteger} = require("lodash");
 const config = require("../config");
 const ExpertAssignedModel = require("../models/ExpertAssigned");
@@ -34,8 +35,8 @@ let jobRunCount = 1;
 agenda.define(
 	config.assignedExportJobs,
 	{
-		lockLifetime: 600000, // Max amount of time the job should take
-		concurrency: 10, // Max number of job instances to run at the same time
+		lockLifetime: 1000, // Max amount of time the job should take
+		concurrency: 4, // Max number of job instances to run at the same time
 	},
 	async (job, done) => {
 		const thisJob = jobRunCount++;
@@ -59,6 +60,7 @@ agenda.define(
 													if (jobs.length !== 0) {
 														// assigned task to experts
 														jobs.forEach(jobData => {
+										
 															var taskAssigned = new TaskAssigned({
 																customerId: expertData.customerId,
 																expertId: expertData.expertId,
@@ -70,8 +72,15 @@ agenda.define(
 																	console.error(err);
 																}
 															});
+
+															if(moment(job.createdAt)
+																.isBefore(moment(job.createdAt).add(jobData.maxAllocatedTimeInHr || 2, "hours"))) {
+																JobModel.findOneAndUpdate({ _id: jobData._id}, { status:"ASSIGNED"});
+															} else {
+																JobModel.findOneAndUpdate({ _id: jobData._id}, { status:"QUEUED"});
+															}
 															
-															JobModel.findOneAndUpdate({ _id: jobData._id}, { status:"ASSIGNED"});
+															
 														});
 														
 													}
@@ -102,7 +111,12 @@ agenda.define(
 																}
 															});
 
-															JobModel.findOneAndUpdate({ _id: jobData._id}, { status:"ASSIGNED"});
+															if(moment(job.createdAt)
+																.isBefore(moment(job.createdAt).add(jobData.maxAllocatedTimeInHr || 2, "hours"))) {
+																JobModel.findOneAndUpdate({ _id: jobData._id}, { status:"ASSIGNED"});
+															} else {
+																JobModel.findOneAndUpdate({ _id: jobData._id}, { status:"QUEUED"});
+															}
 														});
 														
 													}
@@ -123,21 +137,34 @@ agenda.define(
 					res.forEach((expertData) => {
 						TaskAssigned.find().then(notAssignedRes => {
 							if(notAssignedRes.length !== 0 ){
-								notAssignedRes.forEach(data => {
-									const assignedJobToExpert = new TaskAssigned({
-										customerId: expertData.customerId,
-										expertId: expertData.expertId,
-										jobId: data.jobId,
-										expertTime: data.expertTime,
-									});
-					
-									assignedJobToExpert.save(function (err) {
-										if (err) {
-											console.error(err);
+								JobModel.find().then(notAssignedJobs => {
+									// if not assigned any taks then expert assigned task
+									notAssignedJobs.forEach(unAssignedJobData => {
+										const assignedJobToExpert = new TaskAssigned({
+											customerId: unAssignedJobData.customerId,
+											jobId: unAssignedJobData._id,
+											expertTime: unAssignedJobData.maxAllocatedTimeInHr || 2,
+											expertId: expertData.expertId,
+											
+										});
+						
+										assignedJobToExpert.save(function (err) {
+											if (err) {
+												console.error(err);
+											}
+										});
+
+										if(moment(unAssignedJobData.createdAt)
+											.isBefore(moment(unAssignedJobData.createdAt).add(unAssignedJobData.maxAllocatedTimeInHr || 2, "hours"))) {
+											JobModel.findOneAndUpdate({ _id: unAssignedJobData._id}, { status:"ASSIGNED"});
+										} else {
+											JobModel.findOneAndUpdate({ _id: unAssignedJobData._id}, { status:"QUEUED"});
 										}
 									});
 								});
 							}
+
+							
 							
 
 							if(notAssignedRes.length === 0) {
@@ -155,6 +182,13 @@ agenda.define(
 												console.error(err);
 											}
 										});
+
+										if(moment(unAssignedJobData.createdAt)
+											.isBefore(moment(unAssignedJobData.createdAt).add(unAssignedJobData.maxAllocatedTimeInHr || 2, "hours"))) {
+											JobModel.findOneAndUpdate({ _id: unAssignedJobData._id}, { status:"ASSIGNED"});
+										} else {
+											JobModel.findOneAndUpdate({ _id: unAssignedJobData._id}, { status:"QUEUED"});
+										}
 									});
 								});
 							}
@@ -202,9 +236,9 @@ agenda.define(
 
 const assignedExpertJobScheduler = async () => {
 	console.log(time(), "Agenda started");
-	agenda.processEvery("5 minutes");
+	agenda.processEvery("1 second");
 	await agenda.start();
-	await agenda.every("5 minutes", config.assignedExportJobs);
+	await agenda.every("1 second", config.assignedExportJobs);
 
 	// Log job start and completion/failure
 	agenda.on("start", (job) => {

@@ -62,11 +62,11 @@ app.use((err, req, res) => {
 
 // scheduler
 
-taskScheduler();
-assignedExpertScheduler();
-assignedExpertJobScheduler();
-createUserScheduler();
-createExpertScheduler();
+// taskScheduler();
+// assignedExpertScheduler();
+// assignedExpertJobScheduler();
+// createUserScheduler();
+// createExpertScheduler();
 
 
 module.exports = app;

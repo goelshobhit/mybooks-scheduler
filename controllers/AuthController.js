@@ -1,123 +1,32 @@
-const { faker } = require("@faker-js/faker");
-const { v4: uuidv4 } = require("uuid");
+const { last, includes, some } = require("lodash");
 //helper file to prepare responses.
 const apiResponse = require("../helpers/apiResponse");
-const bcrypt = require("bcrypt");
+const ExpertModel = require("../models/ExpertModel");
+const UserModel = require("../models/UserModel");
 
+const loginHandler = (model, req, res) => {
+	try {
+		model.find({ identifier: req.body.id }).then((response) => {
+			return apiResponse.successResponseWithData(res, "user information", last(response));
+		});
+	} catch (err) {
+		console.error(err);
+		//throw error in json response with status 500.
+		return apiResponse.ErrorResponse(res, err);
+	}
+};
 
-exports.bulkExperts = [
+exports.sso = [
 	// Process request after validation and sanitization.
 	(req, res) => {
-		try {
-			const EXPERTS = [];
+		console.log(req.body.id);
+		const isUser = some(["CUSTOMER"], (el) => includes(req.body.id, el));
 
-			const createRandomUser = () => {
-				let ID = uuidv4();
-				return {
-					firstName: faker.internet.userName(),
-					lastName: faker.internet.userName(),
-					email: faker.internet.email(),
-					type: "EXPERT",
-					uuid: ID,
-					identifier: `EXPERT_${ID}`,
-				};
-			};
-
-			Array.from({ length: req.body.count }).forEach(() => {
-				EXPERTS.push(createRandomUser());
-			});
-
-			EXPERTS.forEach((item) => {
-				bcrypt.hash("12345678", 10, function (err, hash) {
-					// Create User object with escaped and trimmed data
-					var expert = new ExpertModel({
-						password: hash,
-						...item,
-					});
-					expert.save(function (err) {
-						if (err) {
-							console.error(err);
-						}
-					});
-				});
-			});
-
-			return apiResponse.successResponse(res, "created");
-		} catch (err) {
-			console.error(err);
-			//throw error in json response with status 500.
-			return apiResponse.ErrorResponse(res, err);
+		if(isUser){
+			loginHandler(UserModel, req, res);
+		} else {
+			loginHandler(ExpertModel, req, res);
 		}
-	},
-];
-
-
-
-exports.bulkUsers = [
-	// Process request after validation and sanitization.
-	(req, res) => {
-		try {
-			const USERS = [];
-
-			const createRandomUser = () => {
-				let ID = uuidv4();
-				return {
-					firstName: faker.internet.userName(),
-					lastName: faker.internet.userName(),
-					email: faker.internet.email(),
-					type: "CUSTOMER",
-					uuid: ID,
-					identifier: `CUSTOMER_${ID}`,
-				};
-			};
-
-			Array.from({ length: 20 }).forEach(() => {
-				USERS.push(createRandomUser());
-			});
-
-			USERS.forEach((item) => {
-				bcrypt.hash("12345678abc", 10, function (err, hash) {
-					// Create User object with escaped and trimmed data
-					const query = {};
-					const projection = {_id: 1 };
-					try {
-						ExpertModel.find(query, projection).then((users) => {
-							var expertId = users[Math.floor(Math.random()*users.length)]["_id"];
-							var user = new UserModel({
-								password: hash,
-								allocatedTo: expertId,
-								...item,
-							});
-							user.save(function (err) {
-								if (err) {
-									console.error(err);
-								}
-							});
-						});
-					} catch(err) {
-						return apiResponse.ErrorResponse(res, err);
-					}
-
-					
+	}
 		
-					
-				});
-			});
-
-			try {
-				const query = {};
-				const projection = {};
-				ExpertModel.find(query, projection).then((users) => {
-					return apiResponse.successResponseWithData(res,"created", users);
-				});
-			} catch(err){
-				return apiResponse.successResponse(res, "created");
-			}
-
-		} catch (err) {
-		
-			//throw error in json response with status 500.
-			return apiResponse.ErrorResponse(res, err);
-		}
-	},
 ];
