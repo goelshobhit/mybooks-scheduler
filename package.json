@@ -12,6 +12,7 @@
     "@faker-js/faker": "^7.6.0",
     "agenda": "^5.0.0",
     "atatus-js": "^4.5.0",
+    "atatus-nodejs": "^1.5.5",
     "atatus-spa": "^4.5.0",
     "bcrypt": "^3.0.6",
     "codacy-coverage": "^3.4.0",

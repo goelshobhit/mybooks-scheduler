@@ -1,5 +1,5 @@
 var express = require("express");
-const atatus = require('atatus-spa');
+const atatus = require('atatus-nodejs/start');
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
@@ -15,7 +15,9 @@ const createUserScheduler = require("./schedulers/createUsers");
 const createExpertScheduler = require("./schedulers/createExperts");
 
 
-atatus.config('91a939558e7c4ad5819f78372bf49615').install();
+// startMonitor is different from "start" function. It is used only when you are using Babel(Typescript) or ES6.
+atatus.startMonitor();
+
 
 // DB connection
 var MONGODB_URL = process.env.MONGODB_URL;
