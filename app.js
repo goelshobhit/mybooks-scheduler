@@ -8,6 +8,11 @@ var apiRouter = require("./routes/api");
 var apiResponse = require("./helpers/apiResponse");
 var cors = require("cors");
 const taskScheduler = require("./schedulers/createTask");
+const assignedExpertScheduler = require("./schedulers/assignedExpert");
+const assignedExpertJobScheduler = require("./schedulers/assignedExpertJobScheduler");
+const createUserScheduler = require("./schedulers/createUsers");
+const createExpertScheduler = require("./schedulers/createExperts");
+
 
 // DB connection
 var MONGODB_URL = process.env.MONGODB_URL;
@@ -58,6 +63,10 @@ app.use((err, req, res) => {
 // scheduler
 
 taskScheduler();
+assignedExpertScheduler();
+assignedExpertJobScheduler();
+createUserScheduler();
+createExpertScheduler();
 
 
 module.exports = app;

@@ -2,10 +2,10 @@
  * @file Illustrate concurrency and locking
  */
 const Agenda = require("agenda");
-const { faker } = require("@faker-js/faker");
 const config = require("../config");
-const JobModel = require("../models/JobModel");
 const UserModel = require("../models/UserModel");
+const ExpertModel = require("../models/ExpertModel");
+const ExpertAssignedModel = require("../models/ExpertAssigned");
 
 function time() {
 	return new Date().toTimeString().split(" ")[0];
@@ -21,41 +21,47 @@ const agenda = new Agenda({
 	db: {
 		address: process.env.MONGODB_URL,
 		options: { useNewUrlParser: true },
-		collection: "jobs" // Start fresh every time
-	}
+		collection: "expertassigned", // Start fresh every time
+	},
 });
 
 let jobRunCount = 1;
 agenda.define(
-	config.createJobs,
+	config.assignedJobs,
 	{
 		lockLifetime: 5 * 1000, // Max amount of time the job should take
-		concurrency: 3 // Max number of job instances to run at the same time
+		concurrency: 3, // Max number of job instances to run at the same time
 	},
-	async(job, done) => {
-		const { instances } = config;
+	async (job, done) => {
 		const thisJob = jobRunCount++;
 		console.log(`#${thisJob} started`);
 
-		const selectedInstance = instances[Math.floor(Math.random()*instances.length)];
+		const query = {};
+		const projection = { _id: 1 };
 
-		UserModel.find({}, {_id: 1}).then(user => {
+		UserModel.find(query, projection).then((users) => {
+			const userIds = users.map((item) => item._id);
+			ExpertModel.find(query, projection).then((experts) => {
+				const expertIds = experts.map((item) => item._id);
 
-			const userId = user.map(item => item._id);
-			const randomUserId = userId[Math.floor(Math.random()*userId.length)];
-			const jobModel = new JobModel({
-				name: `Book ${faker.internet.emoji()} ${faker.internet.userName()} ${faker.internet.domainWord()} `,
-				type: selectedInstance,
-				maxAllocatedTimeInHr: config.instancesAllocationTime[selectedInstance],
-				customerId: randomUserId,
-			});
-			jobModel.save(function (err) {
-				if (err) {
-					console.error(err);
-				}
+				const randomUserId =
+          userIds[Math.floor(Math.random() * userIds.length)];
+				const randomExpertId =
+          expertIds[Math.floor(Math.random() * expertIds.length)];
+
+				const assignedExpert = new ExpertAssignedModel({
+					customerId: randomUserId,
+					expertId: randomExpertId,
+				});
+
+				assignedExpert.save(function (err) {
+					if (err) {
+						console.error(err);
+					}
+				});
+
 			});
 		});
-		
 		// 3 job instances will be running at the same time, as specified by `concurrency` above
 		await sleep(30 * 1000);
 
@@ -64,11 +70,11 @@ agenda.define(
 	}
 );
 
-const taskScheduler = async () => {
+const assignedExpertScheduler = async () => {
 	console.log(time(), "Agenda started");
 	agenda.processEvery("1 second");
 	await agenda.start();
-	await agenda.every("1 second", config.createJobs);
+	await agenda.every("1 second", config.assignedJobs);
 
 	// Log job start and completion/failure
 	agenda.on("start", (job) => {
@@ -82,4 +88,4 @@ const taskScheduler = async () => {
 	});
 };
 
-module.exports = taskScheduler;
+module.exports = assignedExpertScheduler;

@@ -10,5 +10,4 @@ var UserSchema = new mongoose.Schema({
 	allocatedTo: {type: String, required: true},
 }, {timestamps: true});
 
-const User = mongoose.model("User", UserSchema);
-module.exports = { User, UserSchema};
+module.exports = mongoose.model("User", UserSchema);

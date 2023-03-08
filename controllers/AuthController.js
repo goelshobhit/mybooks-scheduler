@@ -1,6 +1,3 @@
-const UserModel = require("../models/UserModel").User;
-const ExpertModel = require("../models/ExpertModel");
-const TaskModel = require("../models/TaskModel");
 const { faker } = require("@faker-js/faker");
 const { v4: uuidv4 } = require("uuid");
 //helper file to prepare responses.
@@ -12,7 +9,7 @@ exports.bulkExperts = [
 	// Process request after validation and sanitization.
 	(req, res) => {
 		try {
-			const USERS = [];
+			const EXPERTS = [];
 
 			const createRandomUser = () => {
 				let ID = uuidv4();
@@ -27,10 +24,10 @@ exports.bulkExperts = [
 			};
 
 			Array.from({ length: req.body.count }).forEach(() => {
-				USERS.push(createRandomUser());
+				EXPERTS.push(createRandomUser());
 			});
 
-			USERS.forEach((item) => {
+			EXPERTS.forEach((item) => {
 				bcrypt.hash("12345678", 10, function (err, hash) {
 					// Create User object with escaped and trimmed data
 					var expert = new ExpertModel({
@@ -55,43 +52,6 @@ exports.bulkExperts = [
 ];
 
 
-exports.bulkTasks = [
-	// Process request after validation and sanitization.
-	(req, res) => {
-		try {
-			const TASKS = [];
-
-			const createRandomTask = () => {
-				return {
-					name: `TASK_${faker.internet.userName()}`,
-				};
-			};
-
-			Array.from({ length: req.body.count }).forEach(() => {
-				TASKS.push(createRandomTask());
-			});
-
-			TASKS.forEach((item) => {
-				var task = new TaskModel({
-					...item,
-					status: "CREATED",
-					type: "REVIEW SALES",
-				});
-				task.save(function (err) {
-					if (err) {
-						return apiResponse.ErrorResponse(res, err);
-					}
-				});
-			});
-
-			return apiResponse.successResponse(res, "created");
-		} catch (err) {
-			console.error(err);
-			//throw error in json response with status 500.
-			return apiResponse.ErrorResponse(res, err);
-		}
-	},
-];
 
 exports.bulkUsers = [
 	// Process request after validation and sanitization.
@@ -111,12 +71,12 @@ exports.bulkUsers = [
 				};
 			};
 
-			Array.from({ length: req.body.count }).forEach(() => {
+			Array.from({ length: 20 }).forEach(() => {
 				USERS.push(createRandomUser());
 			});
 
 			USERS.forEach((item) => {
-				bcrypt.hash("12345678", 10, function (err, hash) {
+				bcrypt.hash("12345678abc", 10, function (err, hash) {
 					// Create User object with escaped and trimmed data
 					const query = {};
 					const projection = {_id: 1 };

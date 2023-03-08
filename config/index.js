@@ -7,5 +7,9 @@ module.exports = {
 		ADD_TAX_TO_BOOKS: 1
 	},
 	instances: ["REVIEW_SALES","REVIEW_PURCHASES", "COMPUTE_TAX", "ADD_TAX_TO_BOOKS"],
-	createJobs: "🚀 CREATE_JOBS"
+	createJobs: "🚀 creating jobs",
+	assignedJobs: "😎😊 Assigned Jobs",
+	assignedExportJobs: "🧑‍💻 Assigned Jobs to Experts",
+	createUsers: "💃 Users",
+	createExperts: "🧑‍💻 Users",
 };
