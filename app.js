@@ -1,4 +1,5 @@
 var express = require("express");
+const atatus = require('atatus-spa');
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
@@ -13,6 +14,8 @@ const assignedExpertJobScheduler = require("./schedulers/assignedExpertJobSchedu
 const createUserScheduler = require("./schedulers/createUsers");
 const createExpertScheduler = require("./schedulers/createExperts");
 
+
+atatus.config('91a939558e7c4ad5819f78372bf49615').install();
 
 // DB connection
 var MONGODB_URL = process.env.MONGODB_URL;
@@ -62,11 +65,11 @@ app.use((err, req, res) => {
 
 // scheduler
 
-// taskScheduler();
-// assignedExpertScheduler();
-// assignedExpertJobScheduler();
-// createUserScheduler();
-// createExpertScheduler();
+taskScheduler();
+assignedExpertScheduler();
+assignedExpertJobScheduler();
+createUserScheduler();
+createExpertScheduler();
 
 
 module.exports = app;
