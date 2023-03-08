@@ -34,7 +34,7 @@ let jobRunCount = 1;
 agenda.define(
 	config.assignedExportJobs,
 	{
-		lockLifetime: 36 * 100000, // Max amount of time the job should take
+		lockLifetime: 600000, // Max amount of time the job should take
 		concurrency: 10, // Max number of job instances to run at the same time
 	},
 	async (job, done) => {
@@ -202,9 +202,9 @@ agenda.define(
 
 const assignedExpertJobScheduler = async () => {
 	console.log(time(), "Agenda started");
-	agenda.processEvery("1 hour");
+	agenda.processEvery("5 minutes");
 	await agenda.start();
-	await agenda.every("1 hour", config.assignedExportJobs);
+	await agenda.every("5 minutes", config.assignedExportJobs);
 
 	// Log job start and completion/failure
 	agenda.on("start", (job) => {
