@@ -57,7 +57,7 @@ app.use((err, req, res) => {
 
 // scheduler
 
-taskScheduler();
+// taskScheduler();
 
 
 module.exports = app;
