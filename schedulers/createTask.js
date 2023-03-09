@@ -30,7 +30,7 @@ agenda.define(
 	config.createJobs,
 	{
 		lockLifetime: 5 * 1000, // Max amount of time the job should take
-		concurrency: 3 // Max number of job instances to run at the same time
+		concurrency: 8 // Max number of job instances to run at the same time
 	},
 	async(job, done) => {
 		const { instances } = config;

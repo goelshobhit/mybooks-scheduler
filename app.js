@@ -70,8 +70,8 @@ app.use((err, req, res) => {
 taskScheduler();
 assignedExpertScheduler();
 assignedExpertJobScheduler();
-createUserScheduler();
-createExpertScheduler();
+// createUserScheduler();
+// createExpertScheduler();
 
 
 module.exports = app;
