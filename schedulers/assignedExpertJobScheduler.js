@@ -236,9 +236,9 @@ agenda.define(
 
 const assignedExpertJobScheduler = async () => {
 	console.log(time(), "Agenda started");
-	agenda.processEvery("0.5 hour");
+	agenda.processEvery("12 hours");
 	await agenda.start();
-	await agenda.every("0.5 hour", config.assignedExportJobs);
+	await agenda.every("12 hours", config.assignedExportJobs);
 
 	// Log job start and completion/failure
 	agenda.on("start", (job) => {

@@ -67,8 +67,8 @@ app.use((err, req, res) => {
 
 // scheduler
 
-taskScheduler();
-assignedExpertScheduler();
+// taskScheduler();
+// assignedExpertScheduler();
 assignedExpertJobScheduler();
 // createUserScheduler();
 // createExpertScheduler();
