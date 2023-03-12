@@ -1,5 +1,4 @@
 var express = require("express");
-const atatus = require('atatus-nodejs/start');
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
@@ -11,12 +10,9 @@ var cors = require("cors");
 const taskScheduler = require("./schedulers/createTask");
 const assignedExpertScheduler = require("./schedulers/assignedExpert");
 const assignedExpertJobScheduler = require("./schedulers/assignedExpertJobScheduler");
-const createUserScheduler = require("./schedulers/createUsers");
-const createExpertScheduler = require("./schedulers/createExperts");
+// const createUserScheduler = require("./schedulers/createUsers");
+// const createExpertScheduler = require("./schedulers/createExperts");
 
-
-// startMonitor is different from "start" function. It is used only when you are using Babel(Typescript) or ES6.
-atatus.startMonitor();
 
 
 // DB connection
@@ -49,6 +45,12 @@ app.use(express.static(path.join(__dirname, "public")));
 //To allow cross-origin requests
 app.use(cors());
 
+// scheduler
+
+taskScheduler();
+assignedExpertScheduler();
+assignedExpertJobScheduler();
+
 //Route Prefixes
 app.use("/", indexRouter);
 app.use("/api/", apiRouter);
@@ -65,11 +67,6 @@ app.use((err, req, res) => {
 	}
 });
 
-// scheduler
-
-// taskScheduler();
-assignedExpertScheduler();
-assignedExpertJobScheduler();
 // createUserScheduler();
 // createExpertScheduler();
 

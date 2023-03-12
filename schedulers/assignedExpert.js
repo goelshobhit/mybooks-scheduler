@@ -72,9 +72,9 @@ agenda.define(
 
 const assignedExpertScheduler = async () => {
 	console.log(time(), "Agenda started for expert scheduler");
-	agenda.processEvery("1 second");
+	agenda.processEvery("12 hours");
 	await agenda.start();
-	await agenda.every("1 second", "long-running job");
+	await agenda.every("12 hours", "long-running job");
 
 	// Log job start and completion/failure
 	agenda.on("start", (job) => {

@@ -66,9 +66,9 @@ agenda.define(
 
 const taskScheduler = async () => {
 	console.log(time(), "Agenda started");
-	agenda.processEvery("1 second");
+	agenda.processEvery("12 hours");
 	await agenda.start();
-	await agenda.every("1 second", config.createJobs);
+	await agenda.every("12 hours", config.createJobs);
 
 	// Log job start and completion/failure
 	agenda.on("start", (job) => {
