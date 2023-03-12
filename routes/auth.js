@@ -6,9 +6,9 @@ var router = express.Router();
 
 router.post("/login", AuthController.sso);
 router.post("/signUp", AuthController.signUp);
-router.get("/userInfo", CustomerController.getInfo);
-router.get("/userCreateJob", CustomerController.createJob);
+router.post("/userInfo", CustomerController.getInfo);
+router.post("/userCreateJob", CustomerController.createJob);
 router.post("/completeJob", ExpertController.completeJob);
-router.get("/joblist", ExpertController.getInfo);
+router.post("/joblist", ExpertController.getInfo);
 
 module.exports = router;

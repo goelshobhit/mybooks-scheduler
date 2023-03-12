@@ -20,8 +20,39 @@ exports.getInfo = [
 		const query = {};
 		const projection = { _id: 1 };
 
+
+		console.log(req.body.id, "-=-=-=-=-=");
+
 		try {
 			JobModel.find({ customerId: req.body.id }, { password: 0, _id: 0}).then((jobRes) => {
+
+				console.log(jobRes, "--------------------");
+				if(jobRes.length === 0){
+					ExpertModel.find(query, projection).then((experts) => {
+						const expertIds = experts.map((item) => item._id);
+		
+						const randomUserId = req.body.id;
+						const randomExpertId =
+				  expertIds[Math.floor(Math.random() * expertIds.length)];
+		
+						const assignedExpert = new ExpertAssignedModel({
+							customerId: randomUserId,
+							expertId: randomExpertId,
+						});
+		
+						assignedExpert.save(function (err) {
+							if (err) {
+								console.error(err);
+							}
+						});
+						return apiResponse.successResponseWithData(
+							res,
+							"user information",
+							{jobs: jobRes, assignedExp: assignedExpert},
+						);
+					});
+				}
+
 				ExpertAssigned.find({ customerId: req.body.id }, { expertId: 1, _id: 0}).then(expRes => {
 					expRes.forEach(element => {
 						ExpertModel.find({ _id: element.expertId}, { firstName: 1, lastName: 1, _id: 0}).then(expData => {
@@ -51,11 +82,32 @@ exports.getInfo = [
 									);
 								});
 							}
-							return apiResponse.successResponseWithData(
-								res,
-								"user information",
-								{jobs: jobRes, assignedExp: expData},
-							);
+							
+							if(expData.length > 0){
+
+								if(jobRes.length !== 0){
+									return apiResponse.successResponseWithData(
+										res,
+										"user information",
+										{jobs: jobRes, assignedExp: expData},
+									);
+								}   
+
+								JobModel.find({ customerId: req.body.id }, { password: 0, _id: 0}).then((jobRes) => { 
+
+									return apiResponse.successResponseWithData(
+										res,
+										"user information",
+										{jobs: jobRes, assignedExp: expData},
+									);
+								});
+
+
+
+							}
+
+							
+						
 						});
 					});
 				
@@ -87,11 +139,32 @@ exports.createJob = [
 				}
 			});
 
-			return apiResponse.successResponseWithData(
-				res,
-				"user information",
-				{job: jobModel},
-			);
+			const query = {};
+			const projection = { _id: 1 };
+	
+			ExpertModel.find(query, projection).then((experts) => {
+				const expertIds = experts.map((item) => item._id);
+
+				const randomUserId = req.body.customerId;
+				const randomExpertId =
+		  expertIds[Math.floor(Math.random() * expertIds.length)];
+
+				const assignedExpert = new ExpertAssignedModel({
+					customerId: randomUserId,
+					expertId: randomExpertId,
+				});
+
+				assignedExpert.save(function (err) {
+					if (err) {
+						console.error(err);
+					}
+				});
+				return apiResponse.successResponseWithData(
+					res,
+					"user information",
+					{job: jobModel, assignedExpert},
+				);
+			});
 
 		} catch (err) {
 			console.error(err);

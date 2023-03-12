@@ -1,24 +1,56 @@
 //helper file to prepare responses.
 const apiResponse = require("../helpers/apiResponse");
+const { filter, isEqual, map, flatMapDepth } = require('lodash');
 const ExpertAssigned = require("../models/ExpertAssigned");
 const JobModel = require("../models/JobModel");
 const TaskAssigned = require("../models/TaskAssigned");
+const UserModel = require("../models/UserModel");
 
 exports.getInfo = [
 	// Process request after validation and sanitization.
 	(req, res) => {
 		try {
-			ExpertAssigned.find({ expertId: req.body.id}, {customerId: 1}).then(customers => {
-				customers.forEach(customer => {
-					TaskAssigned.find({customerId: customer.customerId }, {_id: 0}).then(tasks => {
-						tasks.forEach(taskData => {
-							JobModel.find({customerId: taskData.customerId }, {type:1,name:1}).then(jobList => {
-								return apiResponse.successResponseWithData(res, "job completed", jobList);
-							});
-						});
-					});
+
+			console.log(req.body.id);
+
+			UserModel.aggregate([
+				{
+					"$lookup": {
+						"from": "jobs", 
+						"let": {
+							"episodeId": "$_id"
+						}, 
+						"pipeline": [
+							{
+								"$match": {
+									"$expr": {
+										"$eq": [
+											"$customerId", "$$episodeId"
+										]
+									}
+								}
+							}
+						], 
+						"as": "jobs"
+					}
+				}
+			]).then(data => {
+
+				const filterExperData = filter(data, ({ allocatedTo}) => isEqual(allocatedTo, req.body.id));
+
+				const mappedData = map(filterExperData, item => {
+					const data = {
+						...item,
+						jobs: item.jobs.map(jobData => jobData._id),
+					};
+					return data;
 				});
+
+				return apiResponse.successResponseWithData(res, "expertlist", mappedData);
 			});
+
+			
+
 			
 		} catch (err) {
 			console.error(err);
