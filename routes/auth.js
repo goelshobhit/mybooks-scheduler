@@ -4,7 +4,8 @@ var CustomerController = require("../controllers/CustomerController");
 var ExpertController = require("../controllers/ExpertController");
 var router = express.Router();
 
-router.get("/login", AuthController.sso);
+router.post("/login", AuthController.sso);
+router.post("/signUp", AuthController.signUp);
 router.get("/userInfo", CustomerController.getInfo);
 router.post("/completeJob", ExpertController.completeJob);
 router.get("/joblist", ExpertController.getInfo);
