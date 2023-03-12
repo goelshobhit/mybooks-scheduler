@@ -7,7 +7,7 @@ var indexRouter = require("./routes/index");
 var apiRouter = require("./routes/api");
 var apiResponse = require("./helpers/apiResponse");
 var cors = require("cors");
-const taskScheduler = require("./schedulers/createTask");
+// const taskScheduler = require("./schedulers/createTask");
 const assignedExpertScheduler = require("./schedulers/assignedExpert");
 const assignedExpertJobScheduler = require("./schedulers/assignedExpertJobScheduler");
 // const createUserScheduler = require("./schedulers/createUsers");
@@ -47,7 +47,7 @@ app.use(cors());
 
 // scheduler
 
-taskScheduler();
+// taskScheduler();
 assignedExpertScheduler();
 assignedExpertJobScheduler();
 
